@@ -175,6 +175,15 @@ impl WriteAheadLog {
         self.append_with_flags(entry, ENTRY_COMPLETE)
     }
 
+    /// Ensure the WAL is open
+    fn ensure_open(&self) -> Result<()> {
+        match *self.state.read() {
+            WalState::Open => Ok(()),
+            WalState::Closed => Err(Error::Wal("WAL is closed".to_string())),
+            WalState::NeedsRecovery => Err(Error::Wal("WAL needs recovery".to_string())),
+        }
+    }
+
     /// Append a log entry with specific flags
     pub fn append_with_flags(&self, entry: &LogEntry, flags: u8) -> Result<u64> {
         // Ensure WAL is open
@@ -689,43 +698,34 @@ impl WriteAheadLog {
     }
 
     /// Read and validate the WAL header
-    fn read_and_validate_header<R: Read>(&self, reader: &mut R) -> Result<bool> {
-        // Read magic
-        let mut magic = [0u8; 4];
-        if let Err(e) = reader.read_exact(&mut magic) {
-            return Err(Error::Wal(format!("Failed to read WAL magic: {}", e)));
-        }
-
-        if magic != *WAL_MAGIC {
-            return Ok(false);
-        }
-
-        // Read version
-        let version = match reader.read_u32::<LittleEndian>() {
-            Ok(v) => v,
-            Err(e) => return Err(Error::Wal(format!("Failed to read WAL version: {}", e))),
-        };
-
-        if version != WAL_VERSION {
-            return Ok(false);
-        }
-
-        // Read entry count
-        let _count = match reader.read_u64::<LittleEndian>() {
-            Ok(c) => c,
-            Err(e) => return Err(Error::Wal(format!("Failed to read WAL entry count: {}", e))),
-        };
-        Ok(false);
-
-        // Complete the missing helper methods
-
-        /// Ensure the WAL is open
-        fn ensure_open(&self) -> Result<()> {
-            match *self.state.read() {
-                WalState::Open => Ok(()),
-                WalState::Closed => Err(Error::Wal("WAL is closed".to_string())),
-                WalState::NeedsRecovery => Err(Error::Wal("WAL needs recovery".to_string())),
-            }
-        }
+fn read_and_validate_header<R: Read>(&self, reader: &mut R) -> Result<bool> {
+    // Read magic
+    let mut magic = [0u8; 4];
+    if let Err(e) = reader.read_exact(&mut magic) {
+        return Err(Error::Wal(format!("Failed to read WAL magic: {}", e)));
     }
+
+    if magic != *WAL_MAGIC {
+        return Ok(false);
+    }
+
+    // Read version
+    let version = match reader.read_u32::<LittleEndian>() {
+        Ok(v) => v,
+        Err(e) => return Err(Error::Wal(format!("Failed to read WAL version: {}", e))),
+    };
+
+    if version != WAL_VERSION {
+        return Ok(false);
+    }
+
+    // Read entry count
+    let _count = match reader.read_u64::<LittleEndian>() {
+        Ok(c) => c,
+        Err(e) => return Err(Error::Wal(format!("Failed to read WAL entry count: {}", e))),
+    };
+    
+    // If we got here, the header is valid
+    Ok(true)
+}
 }
