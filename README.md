@@ -4,8 +4,6 @@
 
 <div align="center">
 
-[![Crates.io](https://img.shields.io/crates/v/cocoon_rs.svg)](https://crates.io/crates/cocoon_rs)
-[![Documentation](https://docs.rs/cocoon_rs/badge.svg)](https://docs.rs/cocoon_rs)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.65%2B-orange.svg)](https://www.rust-lang.org)
 [![Build Status](https://img.shields.io/github/workflow/status/chrysalis-rs/cocoon_rs/CI)](https://github.com/chrysalis-rs/cocoon_rs/actions)
