@@ -1,5 +1,7 @@
 # 🪳 Cocoon
 
+## WORK IN PROGRESS
+
 <div align="center">
 
 [![Crates.io](https://img.shields.io/crates/v/cocoon_rs.svg)](https://crates.io/crates/cocoon_rs)
